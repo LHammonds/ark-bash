@@ -6,7 +6,7 @@
 ## Author        : LHammonds
 ## Purpose       : Start a specific game instance.
 ## Compatibility : Verified on Ubuntu Server 20.04 LTS
-## Requirements  : Run as the low-rights user.
+## Requirements  : Run as root or the low-rights user.
 ## Run Frequency : As needed or when starting the server.
 ## Parameters    : Game Instance
 ## Exit Codes    :
