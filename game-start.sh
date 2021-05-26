@@ -6,7 +6,7 @@
 ## Author        : LHammonds
 ## Purpose       : Start a specific game instance.
 ## Compatibility : Verified on Ubuntu Server 20.04 LTS
-## Requirements  : Run as root or the low-rights user.
+## Requirements  : Run as root or the specified low-rights user.
 ## Run Frequency : As needed or when starting the server.
 ## Parameters    : Game Instance
 ## Exit Codes    :
@@ -98,13 +98,17 @@ if [ "${RCONPort}" == "" ]; then
 fi
 if [ "${USER}" == "${GameService}" ]; then
   ## Already running as the low-rights user, start the instance. ##
+  printf "`date +%Y-%m-%d_%H:%M:%S` - [INFO] Started ${GameInstance}\n" >> ${LogFile}
+  f_verbose "${GameRootDir}/${GameInstance}/ShooterGame/Binaries/Linux/ShooterGameServer ${MapName}?listen?MultiHome=0.0.0.0?Port=${GamePort}?QueryPort=${QueryPort}?RCONPort=${RCONPort}?MaxPlayers=${MaxPlayers}?ServerAutoForceRespawnWildDinosInterval=86400?AllowCrateSpawnsOnTopOfStructures=True?GameModIds=${GameModIds} -clusterid=${ClusterID} ${OtherOptions}"
   ${GameRootDir}/${GameInstance}/ShooterGame/Binaries/Linux/ShooterGameServer ${MapName}?listen?MultiHome=0.0.0.0?Port=${GamePort}?QueryPort=${QueryPort}?RCONPort=${RCONPort}?MaxPlayers=${MaxPlayers}?ServerAutoForceRespawnWildDinosInterval=86400?AllowCrateSpawnsOnTopOfStructures=True?GameModIds=${GameModIds} -clusterid=${ClusterID} ${OtherOptions}
 elif [ "${USER}" == "root" ]; then
   ## Run command using low-rights user.
+  printf "`date +%Y-%m-%d_%H:%M:%S` - [INFO] Started ${GameInstance}\n" >> ${LogFile}
+  f_verbose "su --command='${GameRootDir}/${GameInstance}/ShooterGame/Binaries/Linux/ShooterGameServer ${MapName}?listen?MultiHome=0.0.0.0?Port=${GamePort}?QueryPort=${QueryPort}?RCONPort=${RCONPort}?MaxPlayers=${MaxPlayers}?ServerAutoForceRespawnWildDinosInterval=86400?AllowCrateSpawnsOnTopOfStructures=True?GameModIds=${GameModIds} -clusterid=${ClusterID} ${OtherOptions}' ${GameService}"
   su --command="${GameRootDir}/${GameInstance}/ShooterGame/Binaries/Linux/ShooterGameServer ${MapName}?listen?MultiHome=0.0.0.0?Port=${GamePort}?QueryPort=${QueryPort}?RCONPort=${RCONPort}?MaxPlayers=${MaxPlayers}?ServerAutoForceRespawnWildDinosInterval=86400?AllowCrateSpawnsOnTopOfStructures=True?GameModIds=${GameModIds} -clusterid=${ClusterID} ${OtherOptions}" ${GameService}
 else
   ## Exit script with reason and error code. ##
-  echo "`date +%Y-%m-%d_%H:%M:%S` - [ERROR] ${GameInstance} service must be started by ${GameService}" | tee -a ${LogFile}
+  printf "`date +%Y-%m-%d_%H:%M:%S` - [ERROR] ${GameInstance} service must be started by ${GameService}\n" | tee -a ${LogFile}
   exit 4
 fi
 exit 0
