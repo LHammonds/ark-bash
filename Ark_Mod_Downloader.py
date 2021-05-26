@@ -1,3 +1,35 @@
+#############################################################
+## Name          : Ark_Mod_Download.py
+## Version       : 1.1
+## Date          : 2021-04-20
+## Author        : barrycarey (Matthew Carey)
+## Purpose       : Download and extract Ark mods from Steam workshop.
+## Compatibility : Verified on Ubuntu Server 20.04 LTS
+## Requirements  : Python3, arkit.py
+## Run Frequency : As needed.
+## Parameters    : 
+##   --modids - Space separated list of Mod IDs to download
+##   --workingdir (Optional) - Home directory of your ARK server
+##   --steamcmd (Optional) - Path to SteamCMD. If not provided the tool will
+##                           download SteamCMD to the CWD
+##   --update (Optional) - Update all current mods installed on the server
+##   --namefile (Optional) - Creates "Modname.name" file in the mod folder.
+## Example:
+##   python3 /opt/ark/Ark_Mod_Downloader.py --modids "1609138312"
+##   --workingdir "/opt/ark/template" --steamcmd "/usr/games" --namefile
+## Exit Codes    :
+##    0 = Success.
+##    1 = SteamCMD not found.
+##    2 = Ark not found in path.
+##    3 = Failed to extract SteamCMD archive.
+##    4 = Mod ID not provided nor request to update all mods.
+######################## CHANGE LOG #########################
+## DATE       VER WHO WHAT WAS CHANGED
+## ---------- --- --- ---------------------------------------
+## 2017-10-18 1.0 bc  Created script.
+## 2021-04-20 1.1 LTH Modified to work on Linux and include exit codes.
+#############################################################
+
 import arkit
 import sys
 import os
@@ -13,7 +45,7 @@ class ArkModDownloader():
 
     def __init__(self, steamcmd, modids, working_dir, mod_update, modname, preserve=False):
 
-        # I not working directory provided, check if CWD has an ARK server.
+        # If not working directory provided, check if CWD has an ARK server.
         self.working_dir = working_dir
         if not working_dir:
             self.working_dir_check()
@@ -22,13 +54,13 @@ class ArkModDownloader():
 
         if not self.steamcmd_check():
             print("SteamCMD Not Found And We Were Unable To Download It")
-            sys.exit(0)
+            sys.exit(1)
 
         self.modname = modname
         self.installed_mods = []  # List to hold installed mods
         self.map_names = []  # Stores map names from mod.info
         self.meta_data = OrderedDict([])  # Stores key value from modmeta.info
-        self.temp_mod_path = os.path.join(os.path.dirname(self.steamcmd), r"steamapps\workshop\content\346110")
+        self.temp_mod_path = os.path.join(self.working_dir, r"steamapps/workshop/content/346110")
         self.preserve = preserve
 
         self.prep_steamcmd()
@@ -54,12 +86,12 @@ class ArkModDownloader():
     def working_dir_check(self):
         print("[!] No working directory provided.  Checking Current Directory")
         print("[!] " + os.getcwd())
-        if os.path.isdir(os.path.join(os.getcwd(), "ShooterGame\Content")):
+        if os.path.isdir(os.path.join(os.getcwd(), "ShooterGame/Content")):
             print("[+] Current Directory Has Ark Server.  Using The Current Directory")
             self.working_dir = os.getcwd()
         else:
             print("[x] Current Directory Does Not Contain An ARK Server. Aborting")
-            sys.exit(0)
+            sys.exit(2)
 
     def steamcmd_check(self):
         """
@@ -71,22 +103,22 @@ class ArkModDownloader():
         # Check provided directory
         if self.steamcmd:
             print("[+] Checking Provided Path For SteamCMD")
-            if os.path.isfile(os.path.join(self.steamcmd, "steamcmd.exe")):
-                self.steamcmd = os.path.join(self.steamcmd, "steamcmd.exe")
+            if os.path.isfile(os.path.join(self.steamcmd, "steamcmd")):
+                self.steamcmd = os.path.join(self.steamcmd, "steamcmd")
                 print("[+] SteamCMD Found At Provided Path")
                 return True
 
         # Check TCAdmin Directory
         print("[+] SteamCMD Location Not Provided. Checking Common Locations")
-        if os.path.isfile(r"C:\Program Files\TCAdmin2\Monitor\Tools\SteamCmd\steamcmd.exe"):
+        if os.path.isfile(r"C:\Program Files\TCAdmin2\Monitor\Tools\SteamCmd\steamcmd"):
             print("[+] SteamCMD Located In TCAdmin Directory")
-            self.steamcmd = r"C:\Program Files\TCAdmin2\Monitor\Tools\SteamCmd\steamcmd.exe"
+            self.steamcmd = r"C:\Program Files\TCAdmin2\Monitor\Tools\SteamCmd\steamcmd"
             return True
 
         # Check working directory
-        if os.path.isfile(os.path.join(self.working_dir, "SteamCMD\steamcmd.exe")):
+        if os.path.isfile(os.path.join(self.working_dir, "SteamCMD/steamcmd")):
             print("[+] Located SteamCMD")
-            self.steamcmd = os.path.join(self.working_dir, "SteamCMD\steamcmd.exe")
+            self.steamcmd = os.path.join(self.working_dir, "SteamCMD/steamcmd")
             return True
 
         print("[+} SteamCMD Not Found In Common Locations. Attempting To Download")
@@ -106,14 +138,14 @@ class ArkModDownloader():
                 except zipfile.BadZipfile as e:
                     print("[x] Failed To Extract steamcmd.zip. Aborting")
                     print("[x] Error: " + e)
-                    sys.exit()
+                    sys.exit(3)
 
         except urllib.request.HTTPError as e:
             print("[x] Failed To Download SteamCMD. Aborting")
             print("[x] ERROR: " + e)
             return False
 
-        self.steamcmd = os.path.join(self.working_dir, r"SteamCMD\steamcmd.exe")
+        self.steamcmd = os.path.join(self.working_dir, r"SteamCMD/steamcmd")
 
         return True
 
@@ -158,9 +190,9 @@ class ArkModDownloader():
         Build a list of all installed mods by grabbing all directory names from the mod folder
         :return:
         """
-        if not os.path.isdir(os.path.join(self.working_dir, "ShooterGame\Content\Mods")):
+        if not os.path.isdir(os.path.join(self.working_dir, "ShooterGame/Content/Mods")):
             return
-        for curdir, dirs, files in os.walk(os.path.join(self.working_dir, "ShooterGame\Content\Mods")):
+        for curdir, dirs, files in os.walk(os.path.join(self.working_dir, "ShooterGame/Content/Mods")):
             for d in dirs:
                 self.installed_mods.append(d)
             break
@@ -168,17 +200,26 @@ class ArkModDownloader():
     def download_mod(self, modid):
         """
         Launch SteamCMD to download ModID
+        /usr/games/steamcmd +login anonymous +force_install_dir /ArkGenesis +app_update 376030 +workshop_download_item 346110 849985437 +quit
         :return:
         """
         print("[+] Starting Download of Mod " + str(modid))
         args = []
         args.append(self.steamcmd)
         args.append("+login anonymous")
+        args.append("+force_install_dir ")
+        args.append(self.working_dir)
         args.append("+workshop_download_item")
         args.append("346110")
         args.append(modid)
         args.append("+quit")
-        subprocess.call(args, shell=True)
+
+        #wd = os.getcwd()
+        #os.chdir(self.working_dir)
+        res = subprocess.run(args, shell=False)
+        #os.chdir(wd)
+        
+        print("cmd used: "+str(res.args))
 
         return True if self.extract_mod(modid) else False
 
@@ -224,7 +265,7 @@ class ArkModDownloader():
         :return:
         """
 
-        ark_mod_folder = os.path.join(self.working_dir, "ShooterGame\Content\Mods")
+        ark_mod_folder = os.path.join(self.working_dir, "ShooterGame/Content/Mods")
         output_dir = os.path.join(ark_mod_folder, str(modid))
         source_dir = os.path.join(self.temp_mod_path, modid, "WindowsNoEditor")
 
@@ -238,6 +279,8 @@ class ArkModDownloader():
 
         print("[+] Moving Mod Files To: " + output_dir)
         shutil.copytree(source_dir, output_dir)
+        print("[+] Moving Mod File To: " + output_dir + ".mod")
+        shutil.move(output_dir+"/.mod", output_dir+".mod")
 
         if self.modname:
             print("Creating Mod Name File")
@@ -255,10 +298,11 @@ class ArkModDownloader():
             return False
 
         print("[+] Writing .mod File")
-        with open(os.path.join(self.temp_mod_path, modid, r"WindowsNoEditor\.mod"), "w+b") as f:
+        with open(os.path.join(self.temp_mod_path, modid, r"WindowsNoEditor/.mod"), "w+b") as f:
 
             modid = int(modid)
-            f.write(struct.pack('ixxxx', modid))  # Needs 4 pad bits
+            #f.write(struct.pack('ixxxx', modid))  # Needs 4 pad bits
+            f.write(struct.pack('Ixxxx', modid))  # Needs 4 pad bits
             self.write_ue4_string("ModName", f)
             self.write_ue4_string("", f)
 
@@ -325,7 +369,7 @@ class ArkModDownloader():
         print("[+] Collecting Mod Meta Data From modmeta.info")
         print("[+] Located The Following Meta Data:")
 
-        mod_meta = os.path.join(self.temp_mod_path, modid, r"WindowsNoEditor\modmeta.info")
+        mod_meta = os.path.join(self.temp_mod_path, modid, r"WindowsNoEditor/modmeta.info")
         if not os.path.isfile(mod_meta):
             print("[x] Failed To Locate modmeta.info. Cannot continue without it.  Aborting")
             return False
@@ -371,10 +415,10 @@ class ArkModDownloader():
 
         print("[+] Collecting Mod Details From mod.info")
 
-        mod_info = os.path.join(self.temp_mod_path, modid, r"WindowsNoEditor\mod.info")
+        mod_info = os.path.join(self.temp_mod_path, modid, r"WindowsNoEditor/mod.info")
 
         if not os.path.isfile(mod_info):
-            print("[x] Failed to locate mod.info. Cannot Continue.  Aborting")
+            print("[x] Failed to locate mod.info at " + mod_info + ". Cannot Continue.  Aborting")
             return False
 
         with open(mod_info, "rb") as f:
@@ -404,7 +448,7 @@ def main():
     if not args.modids and not args.mod_update:
         print("[x] No Mod ID Provided and Update Not Selected.  Aborting")
         print("[?] Please provide a Mod ID to download or use --update to update your existing mods")
-        sys.exit(0)
+        sys.exit(4)
 
     ArkModDownloader(args.steamcmd,
                      args.modids,
