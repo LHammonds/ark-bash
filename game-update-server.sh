@@ -46,12 +46,12 @@ if [ -f ${SteamOut} ]; then
   rm ${SteamOut}
 fi
 printf "`date +%Y-%m-%d_%H:%M:%S` - Started template update.\n" | tee -a ${LogFile}
-if [ "${USER}" = "root" ]; then
+if [ "${USER}" == "root" ]; then
   ## Switch to the install user and update the instance ##
   f_verbose "su --command='${SteamCMD} +login anonymous +force_install_dir ${TemplateDir} +app_update ${ServerID} +quit > ${SteamOut}' ${GameUser}"
   su --command="${SteamCMD} +login anonymous +force_install_dir ${TemplateDir} +app_update ${ServerID} +quit > ${SteamOut}" ${GameUser}
   ReturnCode=$?
-elif [ "${USER}" = "${GameUser}" ]; then
+elif [ "${USER}" == "${GameUser}" ]; then
   ## Already running as the install user, update the instance ##
   f_verbose "${SteamCMD} +login anonymous +force_install_dir ${TemplateDir} +app_update ${ServerID} +quit > ${SteamOut}"
   ${SteamCMD} +login anonymous +force_install_dir ${TemplateDir} +app_update ${ServerID} +quit > ${SteamOut}
