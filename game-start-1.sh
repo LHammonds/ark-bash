@@ -19,9 +19,13 @@
 ## Import standard variables and functions. ##
 source /etc/gamectl.conf
 
+#######################################
+##            FUNCTIONS              ##
+#######################################
+
 function f_start()
 {
-  printf "\nsystemctl start ${1}\n"
+  printf "\n[INFO] systemctl start ${1}\n"
   printf "\nNOTE: It may take a while before instance processes command.\n"
   systemctl start ${1}
 }
@@ -74,5 +78,4 @@ else
     *)   printf "\nExit\n";;
   esac
 fi
-
 exit 0
