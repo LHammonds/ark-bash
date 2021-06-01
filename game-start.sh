@@ -27,6 +27,7 @@ LogFile="${LogDir}/game-start.log"
 #######################################
 ##            FUNCTIONS              ##
 #######################################
+
 function f_showhelp()
 {
   printf "`date +%Y-%m-%d_%H:%M:%S` - [ERROR] Missing required parameter(s)\n" | tee -a ${LogFile}
@@ -47,7 +48,7 @@ function f_showhelp()
 ##          PREREQUISITES            ##
 #######################################
 
-## Check existence of required command-line parameters.
+## Check existence of required command-line parameters ##
 case "$1" in
   "")
     f_showhelp
@@ -63,13 +64,12 @@ case "$1" in
 esac
 
 ## Validate GameInstance ##
-
-if [ ! -d "${GameRootDir}/${GameInstance}" ]; then
-  echo "`date +%Y-%m-%d_%H:%M:%S` - [ERROR] Invalid parameter. ${GameRootDir}/${GameInstance} does not exist." | tee -a ${LogFile}
+if [ ! -f "${GameRootDir}/${GameInstance}/ShooterGame/Binaries/Linux/ShooterGameServer" ]; then
+  printf "`date +%Y-%m-%d_%H:%M:%S` - [ERROR] Invalid parameter. ${GameRootDir}/${GameInstance} is not a valid instance.\n" | tee -a ${LogFile}
   exit 2
 fi
 
-## Get rcon port number based on instance. ##
+## Get rcon port number based on instance ##
 for intIndex in "${!arrInstanceName[@]}"
 do
   if [ "${GameInstance}" == "${arrInstanceName[${intIndex}]}" ]; then
@@ -97,17 +97,17 @@ if [ "${RCONPort}" == "" ]; then
   exit 3
 fi
 if [ "${USER}" == "${GameService}" ]; then
-  ## Already running as the low-rights user, start the instance. ##
+  ## Already running as the low-rights user, start the instance ##
   printf "`date +%Y-%m-%d_%H:%M:%S` - [INFO] Started ${GameInstance}\n" >> ${LogFile}
   f_verbose "${GameRootDir}/${GameInstance}/ShooterGame/Binaries/Linux/ShooterGameServer ${MapName}?listen?MultiHome=0.0.0.0?Port=${GamePort}?QueryPort=${QueryPort}?RCONPort=${RCONPort}?MaxPlayers=${MaxPlayers}?ServerAutoForceRespawnWildDinosInterval=86400?AllowCrateSpawnsOnTopOfStructures=True?GameModIds=${GameModIds} -clusterid=${ClusterID} ${OtherOptions}"
   ${GameRootDir}/${GameInstance}/ShooterGame/Binaries/Linux/ShooterGameServer ${MapName}?listen?MultiHome=0.0.0.0?Port=${GamePort}?QueryPort=${QueryPort}?RCONPort=${RCONPort}?MaxPlayers=${MaxPlayers}?ServerAutoForceRespawnWildDinosInterval=86400?AllowCrateSpawnsOnTopOfStructures=True?GameModIds=${GameModIds} -clusterid=${ClusterID} ${OtherOptions}
 elif [ "${USER}" == "root" ]; then
-  ## Run command using low-rights user.
+  ## Run command using low-rights user ##
   printf "`date +%Y-%m-%d_%H:%M:%S` - [INFO] Started ${GameInstance}\n" >> ${LogFile}
   f_verbose "su --command='${GameRootDir}/${GameInstance}/ShooterGame/Binaries/Linux/ShooterGameServer ${MapName}?listen?MultiHome=0.0.0.0?Port=${GamePort}?QueryPort=${QueryPort}?RCONPort=${RCONPort}?MaxPlayers=${MaxPlayers}?ServerAutoForceRespawnWildDinosInterval=86400?AllowCrateSpawnsOnTopOfStructures=True?GameModIds=${GameModIds} -clusterid=${ClusterID} ${OtherOptions}' ${GameService}"
   su --command="${GameRootDir}/${GameInstance}/ShooterGame/Binaries/Linux/ShooterGameServer ${MapName}?listen?MultiHome=0.0.0.0?Port=${GamePort}?QueryPort=${QueryPort}?RCONPort=${RCONPort}?MaxPlayers=${MaxPlayers}?ServerAutoForceRespawnWildDinosInterval=86400?AllowCrateSpawnsOnTopOfStructures=True?GameModIds=${GameModIds} -clusterid=${ClusterID} ${OtherOptions}" ${GameService}
 else
-  ## Exit script with reason and error code. ##
+  ## Exit script with reason and error code ##
   printf "`date +%Y-%m-%d_%H:%M:%S` - [ERROR] ${GameInstance} service must be started by ${GameService}\n" | tee -a ${LogFile}
   exit 4
 fi
