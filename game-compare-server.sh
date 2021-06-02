@@ -47,7 +47,7 @@ if [ -f ${TemplateDir}/version.txt ]; then
   TemplateVer=${TemplateVer//$'\n'/}
   TemplateVer=${TemplateVer//$'\r'/}
   TemplateVer=${TemplateVer//$' '/}
-  printf "CURRENT ${TemplateVer} - template\n" | tee -a ${LogFile}
+  printf "[CURRENT] ${TemplateVer} - template\n" | tee -a ${LogFile}
 else
   printf "[ERROR] Missing version file: ${TemplateDir}/version.txt\n" | tee -a ${LogFile}
 fi
@@ -64,9 +64,9 @@ do
       InstanceVer=${InstanceVer//$'\r'/}
       InstanceVer=${InstanceVer//$' '/}
       if [ "${TemplateVer}" == "${InstanceVer}" ]; then
-        printf "CURRENT ${InstanceVer} - ${arrInstanceName[${intIndex}]}\n" | tee -a ${LogFile}
+        printf "[CURRENT] ${InstanceVer} - ${arrInstanceName[${intIndex}]}\n" | tee -a ${LogFile}
       else
-        printf "OLD-VER ${InstanceVer} - ${arrInstanceName[${intIndex}]}\n" | tee -a ${LogFile}
+        printf "[OLD-VER] ${InstanceVer} - ${arrInstanceName[${intIndex}]}\n" | tee -a ${LogFile}
         MatchStatus=1
       fi
     else
