@@ -34,7 +34,7 @@ function f_purge()
   Days=$3
   ## Document files to be deleted in the log ##
   f_verbose "[INFO] ${Folder}/${FilePattern} +${Days}"
-  if [ "${Verbose}" == "1" ]; then
+  if [ "${VerboseMode}" == "1" ]; then
     /usr/bin/find ${Folder} -maxdepth 1 -name "${FilePattern}" -mtime +${Days} -type f -exec /usr/bin/ls -l {} \; >> ${LogFile}
   fi
   /usr/bin/find ${Folder} -maxdepth 1 -name "${FilePattern}" -mtime +${Days} -type f -delete 1>/dev/null 2>&1
@@ -55,10 +55,10 @@ fi
 #######################################
 
 printf "`date +%Y-%m-%d_%H:%M:%S` - Purge started.\n" | tee -a ${LogFile}
-f_purge ${BackupDir}/cluster *.7z ${Default}
-f_purge ${BackupDir}/config *.7z ${Default}
-f_purge ${BackupDir}/map *.7z ${Default}
-f_purge ${BackupDir}/log *.7z ${Default}
-f_purge ${BackupDir}/scripts *.7z ${Default}
+f_purge ${BackupDir}/cluster *.gz ${Default}
+f_purge ${BackupDir}/config *.gz ${Default}
+f_purge ${BackupDir}/map *.gz ${Default}
+f_purge ${BackupDir}/log *.gz ${Default}
+f_purge ${BackupDir}/scripts *.gz ${Default}
 printf "`date +%Y-%m-%d_%H:%M:%S` - Purge completed.\n" | tee -a ${LogFile}
 exit 0
