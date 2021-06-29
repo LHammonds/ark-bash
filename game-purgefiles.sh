@@ -21,7 +21,6 @@
 source /etc/gamectl.conf
 
 LogFile="${LogDir}/game-purgefiles.log"
-Default=15
 
 #######################################
 ##            FUNCTIONS              ##
@@ -55,10 +54,10 @@ fi
 #######################################
 
 printf "`date +%Y-%m-%d_%H:%M:%S` - Purge started.\n" | tee -a ${LogFile}
-f_purge ${BackupDir}/cluster *.gz ${Default}
-f_purge ${BackupDir}/config *.gz ${Default}
-f_purge ${BackupDir}/map *.gz ${Default}
-f_purge ${BackupDir}/log *.gz ${Default}
-f_purge ${BackupDir}/scripts *.gz ${Default}
+f_purge ${BackupDir}/cluster *.gz ${ArchiveDaysToKeep}
+f_purge ${BackupDir}/config *.gz ${ArchiveDaysToKeep}
+f_purge ${BackupDir}/map *.gz ${ArchiveDaysToKeep}
+f_purge ${BackupDir}/log *.gz ${ArchiveDaysToKeep}
+f_purge ${BackupDir}/scripts *.gz ${ArchiveDaysToKeep}
 printf "`date +%Y-%m-%d_%H:%M:%S` - Purge completed.\n" | tee -a ${LogFile}
 exit 0
