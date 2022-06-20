@@ -1,11 +1,11 @@
 #!/bin/bash
 #############################################################
 ## Name          : game-compare-mods.sh
-## Version       : 1.0
-## Date          : 2021-04-20
+## Version       : 1.1
+## Date          : 2022-06-20
 ## Author        : LHammonds
 ## Purpose       : Compare mods in template to those in each instance.
-## Compatibility : Verified on Ubuntu Server 20.04 LTS
+## Compatibility : Verified on Ubuntu Server 20.04 / 22.04 LTS
 ## Requirements  : Run as root, the specified low-rights or install user.
 ## Run Frequency : As needed.
 ## Parameters    : None
@@ -17,11 +17,13 @@
 ## DATE       VER WHO WHAT WAS CHANGED
 ## ---------- --- --- ---------------------------------------
 ## 2021-04-20 1.0 LTH Created script.
+## 2022-06-20 1.1 LTH Added missing LogFile variable.
 #############################################################
 
 ## Import standard variables and functions. ##
 source /etc/gamectl.conf
 
+LogFile="${LogDir}/game-compare-mods.log"
 MatchStatus=0
 TotalCompares=0
 TotalMismatched=0
