@@ -1,11 +1,11 @@
 #!/bin/bash
 #############################################################
 ## Name          : game-cmd.sh
-## Version       : 1.0
-## Date          : 2021-04-20
+## Version       : 1.1
+## Date          : 2022-06-22
 ## Author        : LHammonds
 ## Purpose       : Send a command to a specific game instance.
-## Compatibility : Verified on Ubuntu Server 20.04 LTS
+## Compatibility : Verified on Ubuntu Server 22.04 LTS
 ## Requirements  : rcon - https://github.com/LHammonds/c/blob/main/rcon.c
 ## Run Frequency : As needed for sending console commands to server.
 ## Parameters    : #1 - Game Instance
@@ -20,6 +20,7 @@
 ## DATE       VER WHO WHAT WAS CHANGED
 ## ---------- --- --- ---------------------------------------
 ## 2021-04-20 1.0 LTH Created script.
+## 2022-06-22 1.1 LTH Replaced echo with printf command.
 #############################################################
 
 ## Import standard variables and functions. ##
@@ -57,7 +58,7 @@ function f_runcmd()
     fi
   done
   if [ "${RCONPort}" == "" ]; then
-    echo "ERROR: RCONPort could not be matched with ${GameInstance}"
+    printf "[ERROR] RCONPort could not be matched with ${GameInstance}\n"
     return 1
   fi
   ${ScriptDir}/rcon -f ${RCONFile} -p ${RCONPort} ${cmd}
@@ -96,7 +97,7 @@ esac
 ## Validate GameInstance ##
 
 if [ ! -f "${GameRootDir}/${GameInstance}/ShooterGame/Binaries/Linux/ShooterGameServer" ]; then
-  echo "ERROR: Invalid parameter. ${GameRootDir}/${GameInstance}/ShooterGame/Binaries/Linux/ShooterGameServer" does not exist."
+  printf "ERROR: Invalid parameter. ${GameRootDir}/${GameInstance}/ShooterGame/Binaries/Linux/ShooterGameServer does not exist.\n"
   exit 4
 fi
 
